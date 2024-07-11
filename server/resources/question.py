@@ -45,4 +45,4 @@ class QuestionResource(Resource):
         question = Question.query.get_or_404(question_id)
         db.session.delete(question)
         db.session.commit()
-        return '', 204
+        return {'message': 'Question deleted successfully'}, 204

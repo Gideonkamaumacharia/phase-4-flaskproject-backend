@@ -2,6 +2,7 @@ from flask_restful import Resource, fields, marshal_with, reqparse
 from flask import request
 from model import db, User
 
+
 user_fields = {
     'id': fields.Integer,
     'username':fields.String,
@@ -46,9 +47,13 @@ class UserResource(Resource):
         user.password=data.get('password',user.password)
         db.session.commit()
         return user
-    def delete(self,user_id):
-        user = User.query.get_or_404(user_id)
-        db.session.delete(user)
-        db.session.commit()
-        return '',204
+    def delete(self, user_id):
+        try:
+            user = User.query.get_or_404(user_id)
+            db.session.delete(user)
+            db.session.commit()
+            return '', 204  
+        except Exception as e:
+            print(f"Error deleting user: {str(e)}")
+            return {'message': 'Failed to delete user'}, 500
     
