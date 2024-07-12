@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify
 from flask_restful import Api, Resource, reqparse
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
 from flask_migrate import Migrate
-from sqlalchemy.exc import IntegrityError  # Import IntegrityError from SQLAlchemy
+from sqlalchemy.exc import IntegrityError  
 
 from model import db, User
 from resources.user import UserResource

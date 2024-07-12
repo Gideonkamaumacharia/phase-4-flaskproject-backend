@@ -47,6 +47,7 @@ class SurveyResource(Resource):
         survey.description=data.get('description',survey.description)
         db.session.commit()
         return survey
+    
     def delete(self,survey_id):
         survey = Survey.query.get_or_404(survey_id)
         db.session.delete(survey)
