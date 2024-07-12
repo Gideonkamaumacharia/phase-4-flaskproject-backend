@@ -3,6 +3,7 @@ from flask_restful import Api, Resource, reqparse
 from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
 from flask_migrate import Migrate
 from sqlalchemy.exc import IntegrityError  
+from flask_cors import CORS
 
 from model import db, User
 from resources.user import UserResource
@@ -19,6 +20,7 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///survey.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['JWT_SECRET_KEY'] = '0qwV_Ku1WZjmOKEDZ0OP67MYRQu-VF9-axZXcMH5T58'
+CORS(app)
 
 db.init_app(app)
 migrate = Migrate(app, db)
