@@ -61,13 +61,17 @@ class Login(Resource):
         data = login_args.parse_args()
         user = User.query.filter_by(email=data.get('email')).first()
         if not user:
-            return jsonify({'message':'User does not exist'})
-        hashed_password = bcrypt.generate_password_hash(data.get('password').decode('utf-8'))
-        if not bcrypt.check_password_hash(user.password,hashed_password):
-            return jsonify({'message':'Password do not match'})
+            return jsonify({'message': 'User does not exist'})
         
+        # Hash the password received from the client for comparison
+        hashed_password_from_client = bcrypt.generate_password_hash(data.get('password')).decode('utf-8')
+
+        if not bcrypt.check_password_hash(user.password, hashed_password_from_client):
+            return jsonify({'message': 'Password do not match'})
+
         token = create_access_token(identity=user.id)
-        return jsonify({'token':token})
+        return jsonify({'token': token})
+
 
 api.add_resource(Register,'/register')
 api.add_resource(Login,'/login')
