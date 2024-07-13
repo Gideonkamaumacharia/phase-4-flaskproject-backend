@@ -1,7 +1,9 @@
 from flask_restful import Resource, fields, marshal_with, reqparse
 from flask import request
 from model import db, User
+from flask_bcrypt import Bcrypt,generate_password_hash
 
+bcrypt = Bcrypt()
 
 user_fields = {
     'id': fields.Integer,
@@ -9,6 +11,12 @@ user_fields = {
     'email': fields.String,
     'password':fields.String
 }
+
+user_args = reqparse.RequestParser()
+user_args.add_argument('username')
+user_args.add_argument('email')
+user_args.add_argument('password')
+
 
 class UserResource(Resource):
     @marshal_with(user_fields)
@@ -22,13 +30,13 @@ class UserResource(Resource):
     @marshal_with(user_fields)
     def post(self):
         try:
-            data = request.get_json()
+            data = user_args.parse_args()
+            password_hash = bcrypt.generate_password_hash(data['password']).decode('utf-8')
 
             if not all(key in data for key in ('username', 'email', 'password')):
                 return {'message': 'Missing required fields'}, 400
 
-            new_user = User(username=data['username'], email=data['email'], password=data['password'])
-            new_user.set_password(data['password'])
+            new_user = User(username=data['username'], email=data['email'], password=password_hash)
 
             db.session.add(new_user)
             db.session.commit()
@@ -42,15 +50,10 @@ class UserResource(Resource):
     @marshal_with(user_fields)
     def put(self, user_id):
         try:
-            data = request.get_json()
+            data = user_args.parse_args()
             user = User.query.get_or_404(user_id)
 
-            if 'username' in data:
-                user.username = data['username']
-            if 'email' in data:
-                user.email = data['email']
-            if 'password' in data:
-                user.set_password(data['password'])
+            user.update(data)
 
             db.session.commit()
             return user
@@ -58,6 +61,7 @@ class UserResource(Resource):
         except Exception as e:
             print(f"Error in PUT request: {str(e)}")
             return {'message': 'Internal Server Error'}, 500
+
     def delete(self, user_id):
         try:
             user = User.query.get_or_404(user_id)
