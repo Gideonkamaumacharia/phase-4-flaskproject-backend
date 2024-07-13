@@ -12,21 +12,7 @@ class User(db.Model, SerializerMixin):
     password = db.Column(db.String(128), nullable=False)
     surveys = db.relationship('Survey', back_populates='user')
 
-    def __init__(self, username, email, password):
-        self.username = username
-        self.email = email
-        self.password = password
 
-    @property
-    def password(self):
-        raise AttributeError('password is not a readable attribute')
-    
-    @password.setter
-    def password(self, password):
-        self._password_hash = generate_password_hash(password).decode('utf-8')
-
-    def check_password(self, password):
-        return check_password_hash(self._password_hash, password)
 
     def __repr__(self):
         return f'<User id={self.id}, username={self.username}, email={self.email}>'

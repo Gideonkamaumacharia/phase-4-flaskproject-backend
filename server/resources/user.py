@@ -28,6 +28,7 @@ class UserResource(Resource):
                 return {'message': 'Missing required fields'}, 400
 
             new_user = User(username=data['username'], email=data['email'], password=data['password'])
+            new_user.set_password(data['password'])
 
             db.session.add(new_user)
             db.session.commit()
@@ -39,14 +40,24 @@ class UserResource(Resource):
             return {'message': 'Internal Server Error'}, 500
 
     @marshal_with(user_fields)
-    def put(self,user_id):
-        data = request.get_json()
-        user = User.query.get_or_404(user_id)
-        user.username= data.get('username',user.username)
-        user.email=data.get('email',user.email)
-        user.password=data.get('password',user.password)
-        db.session.commit()
-        return user
+    def put(self, user_id):
+        try:
+            data = request.get_json()
+            user = User.query.get_or_404(user_id)
+
+            if 'username' in data:
+                user.username = data['username']
+            if 'email' in data:
+                user.email = data['email']
+            if 'password' in data:
+                user.set_password(data['password'])
+
+            db.session.commit()
+            return user
+
+        except Exception as e:
+            print(f"Error in PUT request: {str(e)}")
+            return {'message': 'Internal Server Error'}, 500
     def delete(self, user_id):
         try:
             user = User.query.get_or_404(user_id)
