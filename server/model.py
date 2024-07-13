@@ -1,5 +1,4 @@
 from flask_sqlalchemy import SQLAlchemy
-from flask_bcrypt import generate_password_hash, check_password_hash
 from sqlalchemy_serializer import SerializerMixin
 
 db = SQLAlchemy()
@@ -11,8 +10,6 @@ class User(db.Model, SerializerMixin):
     email = db.Column(db.String, nullable=False, unique=True)
     password = db.Column(db.String(128), nullable=False)
     surveys = db.relationship('Survey', back_populates='user')
-
-
 
     def __repr__(self):
         return f'<User id={self.id}, username={self.username}, email={self.email}>'
