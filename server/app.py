@@ -49,7 +49,27 @@ class Register(Resource):
         new_user = User(username=data.get('username'),email=data.get('email'),password=hashed_password)
         db.session.add(new_user)
         db.session.commit()
-        return {'message':'New user created successfully'}
+        return jsonify({'message':'New user created successfully'})
+    
+
+login_args = reqparse.RequestParser()
+login_args.add_argument('email')
+login_args.add_argument('password')
+
+class Login(Resource):
+    def post(self):
+        data = login_args.parse_args()
+        user = User.query.filter_by(email=data.get('email')).first()
+        if not user:
+            return jsonify({'message':'User does not exist'})
+        if not bcrypt.check_password_hash(user.password,data.get('password')):
+            return jsonify({'message':'Password do not match'})
+        
+        token = create_access_token(identity=user.id)
+        return jsonify({'token':token})
+
+api.add_resource(Register,'/register')
+api.add_resource(Login,'/login')
 
 if __name__ == '__main__':
     app.run(debug=True)
