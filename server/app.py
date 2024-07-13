@@ -62,7 +62,8 @@ class Login(Resource):
         user = User.query.filter_by(email=data.get('email')).first()
         if not user:
             return jsonify({'message':'User does not exist'})
-        if not bcrypt.check_password_hash(user.password,data.get('password')):
+        hashed_password = bcrypt.generate_password_hash(data.get('password').decode('utf-8'))
+        if not bcrypt.check_password_hash(user.password,hashed_password):
             return jsonify({'message':'Password do not match'})
         
         token = create_access_token(identity=user.id)
