@@ -56,23 +56,25 @@ login_args = reqparse.RequestParser()
 login_args.add_argument('email', type=str, help='Email address is required', required=True)
 login_args.add_argument('password', type=str, help='Password is required', required=True)
 
+
 class Login(Resource):
     def post(self):
         data = login_args.parse_args()
         user = User.query.filter_by(email=data.get('email')).first()
         if not user:
             return jsonify({'message': 'User does not exist'})
-        hashed_password = bcrypt.generate_password_hash(data.get('password'))
-        if not bcrypt.check_password_hash(user.password, hashed_password):
-            return jsonify({'message': 'Incorrect password'})
-
-        token = create_access_token(identity=user.id)
-        refresh_token = create_refresh_token(identity=user.id)
-        return jsonify({'token': token, 'refresh_token':refresh_token})
-
+        
+        if  bcrypt.check_password_hash(user.password, data.get('password')):
+            
+            token = create_access_token(identity=user.id)
+            refresh_token = create_refresh_token(identity=user.id)
+            return jsonify({'token': token, 'refresh_token': refresh_token})
+        
+        return jsonify({'message': 'Incorrect password'})
 
 api.add_resource(Register,'/register')
 api.add_resource(Login,'/login')
+
 
 if __name__ == '__main__':
     app.run(debug=True)
