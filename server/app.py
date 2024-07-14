@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_restful import Api, Resource, reqparse
-from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity
+from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt_identity,create_refresh_token
 from flask_migrate import Migrate
 from sqlalchemy.exc import IntegrityError 
 from flask_bcrypt import Bcrypt,generate_password_hash, check_password_hash 
@@ -12,10 +12,10 @@ from resources.survey import SurveyResource
 from resources.question import QuestionResource
 from resources.participant import ParticipantResource
 
-import logging
+#import logging
 
 
-logging.basicConfig(level=logging.DEBUG)
+#logging.basicConfig(level=logging.DEBUG)
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///survey.db'
@@ -59,15 +59,16 @@ login_args.add_argument('password', type=str, help='Password is required', requi
 class Login(Resource):
     def post(self):
         data = login_args.parse_args()
-        user = User.query.filter_by(email=data['email']).first()
+        user = User.query.filter_by(email=data.get('email')).first()
         if not user:
             return jsonify({'message': 'User does not exist'})
-
-        if not bcrypt.check_password_hash(user.password, data['password']):
-            return jsonify({'message': 'Password do not match'})
+        hashed_password = bcrypt.generate_password_hash(data.get('password'))
+        if not bcrypt.check_password_hash(user.password, hashed_password):
+            return jsonify({'message': 'Incorrect password'})
 
         token = create_access_token(identity=user.id)
-        return jsonify({'token': token})
+        refresh_token = create_refresh_token(identity=user.id)
+        return jsonify({'token': token, 'refresh_token':refresh_token})
 
 
 api.add_resource(Register,'/register')
