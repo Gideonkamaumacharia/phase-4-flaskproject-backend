@@ -53,20 +53,17 @@ class Register(Resource):
     
 
 login_args = reqparse.RequestParser()
-login_args.add_argument('email')
-login_args.add_argument('password')
+login_args.add_argument('email', type=str, help='Email address is required', required=True)
+login_args.add_argument('password', type=str, help='Password is required', required=True)
 
 class Login(Resource):
     def post(self):
         data = login_args.parse_args()
-        user = User.query.filter_by(email=data.get('email')).first()
+        user = User.query.filter_by(email=data['email']).first()
         if not user:
             return jsonify({'message': 'User does not exist'})
-        
-        # Hash the password received from the client for comparison
-        hashed_password_from_client = bcrypt.generate_password_hash(data.get('password')).decode('utf-8')
 
-        if not bcrypt.check_password_hash(user.password, hashed_password_from_client):
+        if not bcrypt.check_password_hash(user.password, data['password']):
             return jsonify({'message': 'Password do not match'})
 
         token = create_access_token(identity=user.id)
