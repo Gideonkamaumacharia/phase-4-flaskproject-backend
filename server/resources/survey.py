@@ -32,13 +32,24 @@ class SurveyResource(Resource):
         surveys = Survey.query.all()
         return surveys
     
-    @marshal_with(survey_fields)
     def post(self):
         data = request.get_json()
-        new_survey = Survey(title=data['title'],description=data['description'])
+        user_data = data.pop('user', None)
+        
+        user_id = user_data.get('id') if user_data else None
+        if user_id:
+            user = User.query.get(user_id)
+            if not user:
+                return {'message': 'User not found'}, 404
+        else:
+            return {'message': 'User ID is required'}, 400
+        
+        new_survey = Survey(title=data['title'], description=data['description'], user=user)
+        
         db.session.add(new_survey)
         db.session.commit()
-        return new_survey,201
+        
+        return new_survey, 201
     @marshal_with(survey_fields)
     def put(self,survey_id):
         data = request.get_json()

@@ -9,7 +9,7 @@ user_fields = {
     'id': fields.Integer,
     'username': fields.String,
     'email': fields.String,
-    'password': fields.String  # Note: Password should not be exposed in responses, this is just for demonstration
+    'password': fields.String 
 }
 
 user_args = reqparse.RequestParser()
@@ -32,13 +32,13 @@ class UserResource(Resource):
         try:
             data = user_args.parse_args()
 
-            # Hash the password before storing
-            password_hash = bcrypt.generate_password_hash(data.get('password')).decode('utf-8')
+        
+            #password_hash = bcrypt.generate_password_hash(data.get('password')).decode('utf-8')
 
             if not all(key in data for key in ('username', 'email', 'password')):
                 return {'message': 'Missing required fields'}, 400
 
-            new_user = User(username=data.get('username'), email=data.get('email'), password=password_hash)
+            new_user = User(username=data.get('username'), email=data.get('email'), password=data.get('password'))
 
             db.session.add(new_user)
             db.session.commit()
