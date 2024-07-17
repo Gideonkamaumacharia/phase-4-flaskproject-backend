@@ -45,8 +45,8 @@ register_args.add_argument('password')
 class Register(Resource):
     def post(self):
         data = register_args.parse_args()
-       # hashed_password = bcrypt.generate_password_hash(data.get('password'))
-        new_user = User(username=data.get('username'),email=data.get('email'),password=data.get('password'))
+        hashed_password = bcrypt.generate_password_hash(data.get('password'))
+        new_user = User(username=data.get('username'),email=data.get('email'),password=hashed_password)
         db.session.add(new_user)
         db.session.commit()
         return jsonify({'message':'New user created successfully'})

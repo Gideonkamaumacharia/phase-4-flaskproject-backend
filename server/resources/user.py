@@ -1,5 +1,5 @@
 from flask_restful import Resource, fields, marshal_with, reqparse
-from flask import request
+from flask import request,jsonify
 from model import db, User
 from flask_bcrypt import Bcrypt, generate_password_hash
 
@@ -33,12 +33,12 @@ class UserResource(Resource):
             data = user_args.parse_args()
 
         
-            #password_hash = bcrypt.generate_password_hash(data.get('password')).decode('utf-8')
+            password_hash = bcrypt.generate_password_hash(data.get('password')).decode('utf-8')
 
             if not all(key in data for key in ('username', 'email', 'password')):
                 return {'message': 'Missing required fields'}, 400
 
-            new_user = User(username=data.get('username'), email=data.get('email'), password=data.get('password'))
+            new_user = User(username=data.get('username'), email=data.get('email'), password=password_hash)
 
             db.session.add(new_user)
             db.session.commit()
@@ -53,12 +53,31 @@ class UserResource(Resource):
     def put(self, user_id):
         try:
             data = user_args.parse_args()
-            user = User.query.get_or_404(user_id)
+            user = User.query.get(user_id)
 
-            user.update(data)
+            if not user:
+                return {'message': 'User not found'}, 404
+
+            if 'username' in data:
+                user.username = data['username']
+            if 'email' in data:
+                user.email = data['email']
+
+            if 'password' in data:
+                hashed_password = bcrypt.generate_password_hash(data['password']).decode('utf-8')
+                user.password = hashed_password
 
             db.session.commit()
-            return user
+
+           
+            response_data = {
+                'id': user.id,
+                'username': user.username,
+                'email': user.email,
+                
+            }
+
+            return jsonify(response_data), 200
 
         except Exception as e:
             print(f"Error in PUT request: {str(e)}")

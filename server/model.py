@@ -20,18 +20,18 @@ class User(db.Model):
         self.email = email
         self.password = self.set_password(password)
 
-    def set_password(self, password):
-        return bcrypt.generate_password_hash(password).decode('utf-8')
+    #def set_password(self, password):
+     #   return bcrypt.generate_password_hash(password).decode('utf-8')
 
-    def check_password(self, password):
-        return bcrypt.check_password_hash(self.password, password)
+    #def check_password(self, password):
+     #   return bcrypt.check_password_hash(self.password, password)
 
-    def update(self, data):
-        for key, value in data.items():
-            if hasattr(self, key):
-                setattr(self, key, value)
-        if 'password' in data:
-            self.password = self.set_password(data['password'])
+   # def update(self, data):
+      #  for key, value in data.items():
+           # if hasattr(self, key):
+               # setattr(self, key, value)
+        #if 'password' in data:
+          #  self.password = self.set_password(data['password'])
 
 
     def __repr__(self):
